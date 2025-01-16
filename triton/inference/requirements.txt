@@ -1,0 +1,4 @@
+tritonclient[all]
+scipy
+numpy
+librosa==0.9.0

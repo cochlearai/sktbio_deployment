@@ -1,0 +1,38 @@
+name: "nemo-asr-task3"
+backend: "python"
+max_batch_size: 0
+
+input [
+  {
+    name: "input_signal"
+    data_type: TYPE_FP32
+    dims: [ -1 ]
+  }
+]
+
+output [
+  {
+    name: "logits"
+    data_type: TYPE_FP32
+    dims: [ -1 ]
+  },
+  {
+    name: "embs"
+    data_type: TYPE_FP32
+    dims: [ -1 ]
+  }
+]
+
+dynamic_batching {
+    max_queue_delay_microseconds: 2000
+}
+
+instance_group [
+    {
+        count: 1
+        kind: KIND_GPU
+        gpus: [0]
+    }
+]
+
+version_policy: { all { }}

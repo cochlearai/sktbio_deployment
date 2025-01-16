@@ -1,0 +1,32 @@
+name: "jina-embeddings-v3"
+backend: "python"
+
+input [
+  {
+    name: "INPUT"
+    data_type: TYPE_STRING
+    dims: [ -1 ]
+  }
+]
+
+output [
+  {
+    name: "OUTPUT"
+    data_type: TYPE_FP32
+    dims: [ -1 ]
+  }
+]
+
+dynamic_batching {
+    max_queue_delay_microseconds: 2000
+}
+
+instance_group [
+    {
+        count: 1
+        kind: KIND_GPU
+        gpus: [0]
+    }
+]
+
+version_policy: { all { }}
