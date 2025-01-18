@@ -8,7 +8,7 @@
 ### (1) Main Server (Flask)
 Main App의 리소스는 main 폴더 안에 담겨져 있으며, Python3 가상환경 (venv)를 구성하신 후에 requirements.txt에 정의되어 있는 라이브러리들을 설치하시면 바로 구동이 가능합니다. 
 
-Venv 환경 구동:
+Venv 환경 구동 후 라이브러리 설치:
 ```sh
 ./build_triton.sh
 ./run_triton.sh
