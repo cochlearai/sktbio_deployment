@@ -2,9 +2,8 @@ import requests
 
 # URL for the API endpoint
 # url = "http://11.0.0.7:9000/sadvoice"
-url = "http://localhost:9000/sadvoice"
+url = "http://localhost:5000/sadvoice"
 # url = "http://10.0.0.7:5000/sadvoice"
-
 
 # Payload data
 data = {
