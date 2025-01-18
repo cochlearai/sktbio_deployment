@@ -10,8 +10,42 @@ Main App의 리소스는 main 폴더 안에 담겨져 있으며, Python3 가상�
 
 Venv 환경 구동 후 라이브러리 설치:
 ```sh
-./build_triton.sh
-./run_triton.sh
+source bin/activate (만드신 venv 프로젝트 폴더에 들어가신 후)
+pip3 install -r requirements.txt
+```
+
+설치 후 main server 구동: 
+```sh
+python main.py
+```
+
+Main Server의 구동까지 테스트 해보셨다면 다음으로는 정의된 flask app을 gunicorn을 통해서 expose 하는 작업입니다. Gunicorn을 통해 서버를 expose 하는 방식은 본 [링크](https://velog.io/@jiyoung/GunicornNginx-%EB%A6%AC%EB%88%85%EC%8A%A4-%EC%84%9C%EB%B2%84%EC%97%90%EC%84%9C-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0) 를 통해서 한번 익혀보시기 바랍니다. 
+
+Gunicorn Service 정의: 
+```sh
+cd /etc/systemd/system
+vim flask-app.service
+```
+
+flask-app.service 안 내용 정의
+```sh
+[Unit]
+Description=Flask Application
+After=network.target
+
+[Service]
+User=sblee-cochl
+WorkingDirectory=/home/sblee-cochl/work/main/src/deployment
+ExecStart= /home/sblee-cochl/work/main/bin/gunicorn --workers 3 --bind 0.0.>
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Gunicron Service 시작 / 중단:
+```sh
+$ (venv) $ sudo systemctl start gunicorn
+$ (venv) $ sudo systemctl enable gunicorn
 ```
 
 ### (2) Triton Server
