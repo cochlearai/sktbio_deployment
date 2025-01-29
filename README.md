@@ -168,7 +168,7 @@ Thresholds는 김창현 매니저님이 요청 주신 4개의 threshold값을 AP
 
 새로운 오디오 파일을 추가하는 방법과 디테일에 대해서는 계속 아래에 설명드리도록 하겠습니다.
 
-#### 테스트할 오디오 파일 추가 하기
+#### 테스트할 오디오 파일 추가 하기
 웨이센에서 API Request를 보내기 위해서는 (1) 오디오 파일을 shared folder에 추가하기 (2) API Request 보내기의 순서로 이루어 지는데 shared folder는 Azure에서 제공하는 Shared Files 기능을 사용하기 때문에 본 서버는 다른 방식으로는 동작하지 않습니다. 
 반드시 알려드리는 위치에 오디오 파일을 넣어주시고 테스트를 해봐주셔야 합니다. 
 
@@ -217,14 +217,74 @@ TARGET_LANGUAGE = "en" # kr은 쓰지 않음 (베스트 성능이 아님)
 
 감사합니다.
 
-### (4) 서버를 새로 구성해보기
+## (4) 서버를 새로 구성해보기
 이 파트는 Azure에 서버를 처음부터 새로 구성해보는 과정을 순서대로 설명드리려고 합니다. Step 별로 차근차근히 따라하시면 새롭게 서버를 구성하실 수 있으십니다. 
 
-#### 1. GPU가 달린 서버 인스턴스 구성하기 
+### 1. GPU가 달린 서버 인스턴스 구성하기 
 첫번째 단계는 Azure에서 GPU가 달린 서버 인스턴스를 구성하는 방법입니다. 
-
+우선적으로 Azure의 virtual machines에 접속하시고 아래의 그림에서 Create를 누르시기 바랍니다.
 <img width="855" alt="Screenshot 2025-01-29 at 1 50 09 PM" src="https://github.com/user-attachments/assets/f46e869a-7111-43a7-ab18-0f111c7dd9cb" />
 
+다음은 아래 그림처럼 machine의 spec을 설정하는 단계입니다. 이 [가이드](https://forsoftwaredev.tistory.com/13) 를 참고 하시면 손쉽게 GPU 서버를 설정하실 수 있으십니다. 참고차 가이드 링크를 확인해주시고, 아래에는 제가 지금 실제 이 서버를 만들면서 썼던 설정을 설명해두겠습니다.  
 
+<img width="883" alt="Screenshot 2025-01-29 at 1 44 04 PM" src="https://github.com/user-attachments/assets/7d1a62a6-2c2a-4902-904d-64903feac159" />
 
+#### Basics
+- Subscription: tpsydiag-dev로 설정. 이 부분은 리소스 그룹 상위 개념으로 Billing 단위로 묶여있는 주체이므로 그냥 선택가능하신 것을 선택하시면 됩니다.
+- Resource Group: 사용하시려고 하는 리소스 그룹. 현재는 웨이센과의 서버 통신을 위해 rg-waycen으로 설정
+- Virtual Machine Name: 사용하시고자 하는 이름 자유롭게 설정
+- Region: Korea Central 이 부분도 서비스 하고자 하는 지역에 따라서 자유롭게 설정 가능
+- Availability options: Availability zone으로 설정. 이 부분도 지역적으로 한국에서만 서비스한다는 전제하에 이렇게 설정
+- Zone options: Self-selected zone / Availability zone: Zone 1 자유롭게 설정 가능하나 multiple zone을 지원하게는 설정하지 않았음.
+- Security type: Trusted launch virtual machines
+- Image: 베이스가 되는 OS를 고르실 수 있습니다. 저 같은 경우는 Ubuntu Server 24.04 LTS - x64 Gen2를 설정하였습니다.
+- Size: 이 부분은 GPU등 머신 타입을 고르는 과정입니다. 이 과정에서 쓰시고자 하는 GPU를 자유롭게 하셔도 됩니다. 이번 경우에는 Standard_NC16as_T4_v3 - 16 vcpus, 110GiB memory를 사용하였습니다.
+- Authentication type: 이 부분은 vm에 접속하게 하는 권한과 같은 것입니다. SSH와 Password 옵션이 있으면 저 같은 경우에는 Password를 통해서 Username과 Pawssword를 직접 설정해서 접속하였습니다.
+- Inbound port rule: Allow selected ports를 통해서 선택받은 ip만 접속하게 설정했고 ports 정보의 경우에도 SSH 만으로 접속을 할 것이기 때문에 SSH (22)를 선택했습니다.
 
+#### Disks
+Next: Disks 버튼을 눌러서 다음으로 이동하시면, OS의 디스크 사이즈와 디스크 타입을 선택하시는 단계입니다. 이 부분은 image default인 30기가 보다는 많게 설정하셔야 할것입니다. 저 같은 경우에는 SSD로 설정해서 디스크를 설정했습니다.
+
+#### Networking
+네트워킹 설정 파트로 일단 Virtual network를 설정하고 넘어가면 될것입니다.
+
+나머지 파트들 Management, Monitoring, Advanced, Tags 부분들이 남아있지만 그냥 설정안하고 creation 해도 되실 듯 합니다.
+
+#### VM에 접속하기
+VM을 creation 하고 난 후에 클릭을 한 다음에 Overview 파트에 가보시면 v=public IP Address가 생성된 것을 보실 수 있으십니다. 그 정보를 가지고 VM에 접속하면 됩니다.
+
+아래와 같은 정보로 접속하시고, 설정하신 비번을 치고 접속하시면 됩니다. 
+```sh
+Host sktbio-gpu
+  HostName 40.82.136.59 (퍼블릭 IP)
+  User sblee-cochl (설정한 유저 정보)
+  Port 22
+```
+
+### 2. VM 접속 후 추가적으로 설정하기
+VM 까지 접속하시고 난 후에는 여러 가지 설정할 것이 여러가지 남았습니다. 아래의 것을 추가적으로 설정하시면 될듯합니다.
+
+#### Nvidia Driver Extention 깔아주기
+VM을 설정하고 난 후에 엔비디아 드라이버 익스텐션을 깔아줘야합니다. 그 방법은 [여기](https://learn.microsoft.com/ko-kr/azure/virtual-machines/extensions/hpccompute-gpu-linux) 에 자세히 나와있으니 참고하시기 바랍니다.
+
+#### Docker 깔기
+트라이톤 서버를 구동하기 위해서는 Docker 설정이 필수적입니다. 그 방법에 대해서는 [여기](https://kr-goos.github.io/posts/docker-install-ubuntu/) 를 참조해서 깔아주시기 바랍니다. 맞은 OS에 해당하는 도커를 깔아주셔도 될듯합니다. 저 링크에는 ubuntu 24.04에서 도커를 까는 방식을 소개합니다. 
+
+#### Venv 인스톨 및 설정하기
+Main Server를 구동하기 위해서는 Venv의 설치가 필수적입니다. 그 방법에 대해서는 [여기](https://docs.vultr.com/how-to-install-python-and-pip-on-ubuntu-24-04) 해서 깔아주시기 바랍니다.
+
+### 3. 서버 구성하고 실행하기
+여기까지 오셨다면 서버를 구동해서 실행할 준비가 다 끝났다는 것을 의미합니다. 그 방법에 대해서는 위의 1번과 2번의 과정을 통해 서버를 구동하고 설정하는 방법을 설명해드렸습니다. 위의 방식을 통해 서버를 띄우시고 테스트해보시기 바랍니다.
+
+### 4. 퍼블릭 IP를 통해 앱을 Expose 하기
+VM을 통해 서비스하는 서버를 VM 외에서도 쓸수 있게 하기 위해서는 몇 가지 설정이 더 필요합니다. 
+아래읙 그림과 같이 Network settings에 Inbound port rules에 5000번을 expose 해주시기 바랍니다. 5000번을 expose 해주는 이유는 flask 앱이 5000번을 통해 서비스 되기 때문입니다.
+
+<img width="945" alt="Screenshot 2025-01-29 at 3 14 16 PM" src="https://github.com/user-attachments/assets/4c4ba9b1-122b-496d-8f79-701bc1a4f0c2" />
+
+Inbound rule을 설정하실때, 특정 IP 만에게만 서비스를 열수도 있습니다. 아마 그것을 all access로 잡으면 SKT의 보안 규정에 걸릴 것입니다. 앱에 접속하고자 하는 클라이언트의 IP를 특정하셔서 그것을 아래 그림과같이 source (IP Addresses), Source IP를 설정하셔서 저장해주세요. 
+
+<img width="1037" alt="Screenshot 2025-01-29 at 3 16 05 PM" src="https://github.com/user-attachments/assets/e7db9a04-dc98-412f-b82d-6a5834d76e01" />
+
+이렇게까지 하시면 앱을 사용할 준비가 끝났다고 보시면 됩니다.
+감사합니다.
