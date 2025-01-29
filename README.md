@@ -270,6 +270,17 @@ VM을 설정하고 난 후에 엔비디아 드라이버 익스텐션을 깔아�
 #### Docker 깔기
 트라이톤 서버를 구동하기 위해서는 Docker 설정이 필수적입니다. 그 방법에 대해서는 [여기](https://kr-goos.github.io/posts/docker-install-ubuntu/) 를 참조해서 깔아주시기 바랍니다. 맞은 OS에 해당하는 도커를 깔아주셔도 될듯합니다. 저 링크에는 ubuntu 24.04에서 도커를 까는 방식을 소개합니다. 
 
+#### 파일 저장소 설정하기
+이 부분은 이번 파트의 핵심적인 부분 중 하나라고 할 수 있습니다. 클라이언트 (웨이센)이 오디오 파일을 저희 서버에 공유하는 방식으로 SMB Azure file share을 쓰고 있기 때문입니다. 
+이 [링크](https://learn.microsoft.com/en-us/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal) 를 통해서 SMB Azure file share를 설정하세요. 본 메인 서버의 경우에는 audiofile 라는 폴더를 생성하여서 설정했습니다. 그렇게 된다면 VM 안에 아래와 같은 경로에 파일을 넣으시면 share가 됩니다. 
+
+```sh
+/mnt/audiofiles/
+```
+
+SMB Azure file share가 아닌 다른 방식으로 파일을 주고받게 하는 방식도 있겠으나 그렇다면 서버의 파일을 가져오는 방식을 변경하셔야합니다. 추가적으로 질문 생기시면 질문주시기 바랍니다.
+
+
 #### Venv 인스톨 및 설정하기
 Main Server를 구동하기 위해서는 Venv의 설치가 필수적입니다. 그 방법에 대해서는 [여기](https://docs.vultr.com/how-to-install-python-and-pip-on-ubuntu-24-04) 해서 깔아주시기 바랍니다.
 
